@@ -7,9 +7,9 @@ The final build of CyberChef will be located in
 
 ### Design principles:
   - Create a production build of CyberChef on a (disposable) system with Vagrant. This system has the hostname *charpentier*.
-  - Copy the production build to the virtual host if using Vagrant.
-  - Create another Virtual Server using Vagrant using that build with NGINX. This has the hostname *cyberchef*.
-  - Alternatively copy the build to another Web Server.
+  - Copy the production build to the virtual host server in the ./CyberChef directory.
+  - Create another Virtual Server using NGINX as the webserver for the build created in the previous step. This has the hostname *cyberchef*.
+  - Alternatively copy the build to another Web Server and install NGINX there.
 
 <b>Note:</b> CyberChef will only build on Node 10, but appear to run nicely on newer version. Therefore the actual web-server will be running the Package in the Debian repositories.
 
@@ -27,6 +27,13 @@ The simplified installation-flow is depicted below.
 
 <img src="./Images/BuildCC.png" alt="Build flow"/>
 
+You can either just create the build and copy it manually to another system. By using
+``` vagrant up charpentier ``` 
+
+or you can let it create the webserver automatically, using
+``` vagrant up charpentier cyberchef ```
+
+If you need to start over again, use ``` vagrant destroy -f charpentier cyberchef; vagrant up charpentier cyberchef ```
 
 ---
 
@@ -40,5 +47,5 @@ From "about" in the web app:
 
 
 To learn more about CyberChef, I recommmend these resources:
-CyberChe Wiki: https://github.com/gchq/CyberChef/wiki
+CyberChef Wiki: https://github.com/gchq/CyberChef/wiki
 Training: https://www.networkdefense.co/courses/cyberchef/

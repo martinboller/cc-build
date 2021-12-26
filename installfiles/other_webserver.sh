@@ -10,12 +10,9 @@
 #                                                                           #
 # Changes:      Initial Version (1.00)                                      #
 #                                                                           #
-#                                                                           #
-# Instruction:  builds latest Cyberchef version and copies                  #
-#               build to host ./CyberChef to use for prod                   #
-#               system. Create vagrant system or copy all of                #
-#               ./CyberChef to your own web-server                          #
-#                                                                           #
+# Instruction:  Installs and configures NGINX with self-signed              #
+#               certificates. Manually copy CyberChef build to              #
+#               /var/www/CyberChef/                                         #
 #                                                                           #
 #############################################################################
 
@@ -32,7 +29,6 @@ install_prerequisites() {
     VER=$VERSION_ID
     /usr/bin/logger "Operating System: $OS Version: $VER" -t 'CyberChef-20211226';
     echo -e "\e[1;32mOperating System: $OS Version: $VER\e[0m";
- 
     # Install prerequisites
     apt-get update;
     # Set correct locale
@@ -41,13 +37,8 @@ install_prerequisites() {
     # Other pre-requisites for CyberChef
     apt-get -y install python3-pip python-is-python3 curl gnupg2;
     apt-get -y install bash-completion git sudo;
-    # NodeJS 10 required for CyberChef, so going to install NVM to be able to install Node v10.24.1
-    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-    # Installing and enabling node v10.24.1 as default
-    source ~/.bashrc;
-    nvm install v10.24.1;
-    nvm use v10.24.1;
-    # A little apt
+
+    # A little apt for cleanup
     apt-get -y install --fix-missing;
     apt-get update;
     apt-get -y full-upgrade;
@@ -59,40 +50,31 @@ install_prerequisites() {
     /usr/bin/logger 'install_prerequisites finished' -t 'CyberChef-20211226';
 }
 
-obtain_cyberchef() {
-    /usr/bin/logger 'obtain_cyberchef()' -t 'CyberChef-20211226';
-    cd /opt/;
-    # Get latest version from GitHub
-    git clone https://github.com/gchq/CyberChef.git;
-    sync;
-    /usr/bin/logger 'obtain_cyberchef() finished' -t 'CyberChef-20211226';
+install_nodejs_10() {
+    # NodeJS 10 required for CyberChef, so going to install NVM to install Node v10.24.1
+    /usr/bin/logger 'install_nodejs_10()' -t 'CyberChef-20211226';
+    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    source ~/.bashrc;
+    nvm install v10.24.1;
+    nvm use v10.24.1;
+    /usr/bin/logger 'install_nodejs_10() finished' -t 'CyberChef-20211226';
 }
 
-install_cyberchef() {
-    /usr/bin/logger 'install_cyberchef()' -t 'CyberChef-20211226';
-    export NODE_OPTIONS=--max_old_space_size=2048
-    cd /opt/CyberChef/;
-    /usr/bin/logger '...Fix for fixCryptoApiImports()' -t 'CyberChef-20211226';
-    sed -ie '/fixCryptoApiImports: {/a\        options: {shell: "/bin/bash"},' Gruntfile.js
-    /usr/bin/logger '...Install Grunt' -t 'CyberChef-20211226';
-    npm install -g grunt-cli;
-    npm install grunt;
+install_nodejs_debian_repo() {
+    /usr/bin/logger 'install_nodejs_debian_repo()' -t 'CyberChef-20211226';
+    apt-get -y install nodejs;
+    /usr/bin/logger 'install_nodejs_debian_repo() finished' -t 'CyberChef-20211226';
+}
 
-    /usr/bin/logger '...NPM Install of CyberChef' -t 'CyberChef-20211226';
-    npm --experimental-modules --unsafe-perm install;
-
-    /usr/bin/logger '...Rebuild CyberChef' -t 'CyberChef-20211226';
-    npm --experimental-modules --unsafe-perm rebuild;
-
-    /usr/bin/logger '...Audit and fix NPM modules CyberChef' -t 'CyberChef-20211226';
-    npm --experimental-modules --unsafe-perm audit fix --force;
-
-    /usr/bin/logger '...Create Prod build of CyberChef' -t 'CyberChef-20211226';
-    grunt prod --force;
-
-    /usr/bin/logger '...Set permissions' -t 'CyberChef-20211226';
-    chown -R www-data:www-data $BUILD_LOCATION;
-    /usr/bin/logger 'install_cyberchef()' -t 'CyberChef-20211226';
+obtain_cyberchef_build() {
+    /usr/bin/logger 'obtain_cyberchef_build()' -t 'CyberChef-20211226';
+    mkdir -p /var/www/CyberChef/;
+    echo -e "\e[1;31m--------------------------------------------\e[0m";
+    echo -e "\e[1;31mCopy the finished production build of CyberChef to $BUILD_LOCATION before continuing";
+    read -p "Press Return to continue" Dummy;
+    echo -e "\e[0m"
+    chown -R www-data:www-data /var/www/;
+    /usr/bin/logger 'obtain_cyberchef_build() finished' -t 'CyberChef-20211226';
 }
 
 install_nginx() {
@@ -108,7 +90,7 @@ configure_nginx() {
     cat << __EOF__ > /etc/nginx/sites-available/default;
 #
 # Changed by: Martin Boller
-# Last Update: 2021-11-21
+# Last Update: 2021-11-26
 #
 # Web Server for CyberChef
 # Running on, or redirecting to, port 443 TLS
@@ -122,7 +104,7 @@ server {
 server {
     client_max_body_size 32M;
     listen 443 ssl http2;
-    root $BUILD_LOCATION;
+    root /var/www/CyberChef;
     index index.html;
     ssl_certificate           /etc/nginx/certs/$HOSTNAME.crt;
     ssl_certificate_key       /etc/nginx/certs/$HOSTNAME.key;
@@ -198,10 +180,145 @@ __EOF__
     /usr/bin/logger 'nginx_certificates() finished' -t 'CyberChef-20211226';
 }
 
-copy_build_2_host() {
-    /usr/bin/logger 'copy_build_2_host()' -t 'CyberChef-20211226';
-    cp -r $BUILD_LOCATION/* /mnt/build/;
-    /usr/bin/logger 'copy_build_2_host() finished' -t 'CyberChef-20211226';
+configure_iptables() {
+    /usr/bin/logger 'configure_iptables()' -t 'CyberChef-20211226';
+    echo -e "\e[32mconfigure_iptables()\e[0m";
+    echo -e "\e[32m-Creating iptables rules file\e[0m";
+    cat << __EOF__  >> /etc/network/iptables.rules
+##
+## Ruleset for CyberChef Server
+##
+## IPTABLES Ruleset Author: Martin Boller 2021-12-26 v1
+
+*filter
+## Dropping anything not explicitly allowed
+##
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+:LOG_DROPS - [0:0]
+
+## DROP IP fragments
+-A INPUT -f -j LOG_DROPS
+-A INPUT -m ttl --ttl-lt 4 -j LOG_DROPS
+
+## DROP bad TCP/UDP combinations
+-A INPUT -p tcp --dport 0 -j LOG_DROPS
+-A INPUT -p udp --dport 0 -j LOG_DROPS
+-A INPUT -p tcp --tcp-flags ALL NONE -j LOG_DROPS
+-A INPUT -p tcp --tcp-flags ALL ALL -j LOG_DROPS
+
+## Allow everything on loopback
+-A INPUT -i lo -j ACCEPT
+
+## SSH, DNS, WHOIS, DHCP ICMP - Add anything else here needed for ntp, monitoring, dhcp, icmp, updates, and ssh
+##
+## SSH
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
+## HTTP(S)
+-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+## NTP
+### ICMP
+-A INPUT -p icmp -j ACCEPT
+## Already established sessions
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+## Logging
+-A INPUT -j LOG_DROPS
+## get rid of broadcast noise
+-A LOG_DROPS -d 255.255.255.255 -j DROP
+# Drop Broadcast to internal networks
+-A LOG_DROPS -m pkttype --pkt-type broadcast -d 192.168.0.0/16 -j DROP
+-A LOG_DROPS -p ip -m limit --limit 60/sec -j LOG --log-prefix "iptables:" --log-level 7
+-A LOG_DROPS -j DROP
+
+## Commit everything
+COMMIT
+__EOF__
+
+# ipv6 rules
+    cat << __EOF__  >> /etc/network/ip6tables.rules
+##
+## Ruleset for CyberChef Server
+##
+## IP6TABLES Ruleset Author: Martin Boller 2021-12-26 v1
+
+*filter
+## Dropping anything not explicitly allowed
+##
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+:LOG_DROPS - [0:0]
+
+## DROP bad TCP/UDP combinations
+-A INPUT -p tcp --dport 0 -j LOG_DROPS
+-A INPUT -p udp --dport 0 -j LOG_DROPS
+-A INPUT -p tcp --tcp-flags ALL NONE -j LOG_DROPS
+-A INPUT -p tcp --tcp-flags ALL ALL -j LOG_DROPS
+
+## Allow everything on loopback
+-A INPUT -i lo -j ACCEPT
+
+## SSH, DNS, WHOIS, DHCP ICMP - Add anything else here needed for ntp, monitoring, dhcp, icmp, updates, and ssh
+## SSH
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
+## HTTP(S)
+-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+## NTP
+#-A INPUT -p udp -m udp --dport 123 -j ACCEPT
+## ICMP
+-A INPUT -p icmp -j ACCEPT
+## Already established sessions
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+## Logging
+-A INPUT -j LOG_DROPS
+-A LOG_DROPS -p ip -m limit --limit 60/sec -j LOG --log-prefix "iptables:" --log-level 7
+-A LOG_DROPS -j DROP
+
+## Commit everything
+COMMIT
+__EOF__
+
+    # Configure separate file for iptables logging
+    cat << __EOF__  >> /etc/rsyslog.d/30-iptables-syslog.conf
+:msg,contains,"iptables:" /var/log/iptables.log
+& stop
+__EOF__
+    sync;
+    systemctl restart rsyslog.service;
+
+    # Configure daily logrotation (forward this log to log mgmt)
+    cat << __EOF__  >> /etc/logrotate.d/iptables
+/var/log/iptables.log {
+  rotate 2
+  daily
+  compress
+  create 640 root root
+  notifempty
+  postrotate
+    /usr/lib/rsyslog/rsyslog-rotate
+  endscript
+}
+__EOF__
+
+# Apply iptables at boot
+    echo -e "\e[36m-Script applying iptables rules\e[0m";
+    cat << __EOF__  >> /etc/network/if-up.d/firewallrules
+#! /bin/bash
+iptables-restore < /etc/network/iptables.rules
+ip6tables-restore < /etc/network/ip6tables.rules
+exit 0
+__EOF__
+    sync;
+    ## make the script executable
+    chmod +x /etc/network/if-up.d/firewallrules;
+    # Apply firewall rules for the first time
+    #/etc/network/if-up.d/firewallrules;
+    /usr/bin/logger 'configure_iptables() finished' -t 'CyberChef-20211226';
 }
 
 start_services() {
@@ -222,28 +339,33 @@ start_services() {
     /usr/bin/logger 'start_services finished' -t 'CyberChef-20211226';
 }
 
-
 ##################################################################################################################
 ## Main                                                                                                          #
 ##################################################################################################################
 
 main() {
-    BUILD_LOCATION="/opt/CyberChef/build/prod";
+    BUILD_LOCATION="/var/www/CyberChef";
+    obtain_cyberchef_build;
     # NGINX and certificates
     # Create and Install certificates
     CERTIFICATE_ORG="CyberChef"
     # Local information
     CERTIFICATE_COUNTRY="DK"
     CA_CERTIFICATE_STATE="Denmark"
-    CERTIFICATE_LOCALITY="Copenhagen"
+    CERTIFICATE_LOCALITY="Aabenraa"
+    # Install requirements
     install_prerequisites;
-    obtain_cyberchef;
-    # To test the build immediately install and configure NGINX with certificates (uncomment below)
-#    install_nginx;
-#    nginx_certificates;
-#    configure_nginx;
-    install_cyberchef;
-    copy_build_2_host;
+    # Install the version of node you want (default "debian repo provided")
+    install_nodejs_debian_repo;
+    #install_nodejs_10;
+    # Install and configure NGINX with self-signed certificate
+    install_nginx;
+    nginx_certificates;
+    configure_nginx;
+    # Copy the finished build from the virtual host server
+    configure_iptables
+    # Restart NGINX
+    start_services;
 }
 
 main;

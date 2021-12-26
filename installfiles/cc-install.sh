@@ -68,10 +68,10 @@ install_nodejs_debian_repo() {
 
 obtain_cyberchef_build() {
     /usr/bin/logger 'obtain_cyberchef_build()' -t 'CyberChef-20211226';
-    mkdir -p /var/www/CyberChef/;
-    cp -r /mnt/build/* /var/www/CyberChef/;
+    mkdir -p $BUILD_LOCATION;
+    cp -r /mnt/build/* $BUILD_LOCATION;
     sync;
-    chown -R www-data:www-data /var/www/;
+    chown -R www-data:www-data $BUILD_LOCATION;
     /usr/bin/logger 'obtain_cyberchef_build() finished' -t 'CyberChef-20211226';
 }
 
@@ -102,7 +102,7 @@ server {
 server {
     client_max_body_size 32M;
     listen 443 ssl http2;
-    root /var/www/CyberChef;
+    root $BUILD_LOCATION;
     index index.html;
     ssl_certificate           /etc/nginx/certs/$HOSTNAME.crt;
     ssl_certificate_key       /etc/nginx/certs/$HOSTNAME.key;
@@ -342,6 +342,8 @@ start_services() {
 ##################################################################################################################
 
 main() {
+    # CberChef finalized build location
+    BUILD_LOCATION="/var/www/CyberChef";
     # NGINX and certificates
     # Create and Install certificates
     CERTIFICATE_ORG="CyberChef"
@@ -360,7 +362,7 @@ main() {
     configure_nginx;
     # Copy the finished build from the virtual host server
     obtain_cyberchef_build;
-    /con
+    configure_iptables;
     # Restart NGINX
     start_services;
 }
