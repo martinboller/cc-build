@@ -58,15 +58,15 @@ apt_install_prerequisites() {
     /usr/bin/logger 'apt_install_prerequisites() finished' -t 'CyberChef-bootstrap';
 }
 
-install_ssh_keys() {
-    /usr/bin/logger 'install_ssh_keys()' -t 'CyberChef-bootstrap';
+install_public_ssh_key() {
+    /usr/bin/logger 'install_public_ssh_key()' -t 'CyberChef-bootstrap';
     # Echo add SSH public key for root logon
     export DEBIAN_FRONTEND=noninteractive;
     mkdir /root/.ssh;
-    echo $mySSHKey | sudo tee -a /root/.ssh/authorized_keys;
+    echo $myPublicSSHKey | sudo tee -a /root/.ssh/authorized_keys;
     sudo chmod 700 /root/.ssh;
     sudo chmod 600 /root/.ssh/authorized_keys;
-    /usr/bin/logger 'install_ssh_keys() finished' -t 'CyberChef-bootstrap';
+    /usr/bin/logger 'install_public_ssh_key() finished' -t 'CyberChef-bootstrap';
 }
 
 ##################################################################################################################
@@ -76,9 +76,11 @@ install_ssh_keys() {
 main() {
     # Core elements, always installs
     #prepare_files;
-    export mySSHKey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIHJYsxpawSLfmIAZTPWdWe2xLAH758JjNs5/Z2pPWYm"
+    ## Change the public key below to be yours, and don't allow me root access using my lab key.
+    ## Which will happen if you leave the key below in the script.
+    export myPublicSSHKey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIHJYsxpawSLfmIAZTPWdWe2xLAH758JjNs5/Z2pPWYm"
     /usr/bin/logger '!!!!! Main routine starting' -t 'CyberChef-bootstrap';
-    install_ssh_keys;
+    install_public_ssh_key;
     configure_timezone;
     apt_install_prerequisites;
     configure_locale;
