@@ -5,7 +5,6 @@ Vagrant.configure("2") do |config|
     cfg.vm.box = "generic/debian11"
     cfg.vm.hostname = "charpentier"
     cfg.vm.network "public_network", type: "dhcp", bridge: 'enp1s0'
-#, mac: "0020911E0007"
     cfg.vm.provision :file, source: './installfiles', destination: "/tmp/installfiles"
     cfg.vm.provision :shell, path: "bootstrap.sh"
     cfg.vm.synced_folder "./CyberChef/", "/mnt/build"
@@ -39,7 +38,6 @@ Vagrant.configure("2") do |config|
     cfg.vm.box = "generic/debian11"
     cfg.vm.hostname = "cyberchef"
     cfg.vm.network "public_network", type: "dhcp", bridge: 'enp1s0'
-#, mac: "0020911E0007"
     cfg.vm.provision :file, source: './installfiles', destination: "/tmp/installfiles"
     cfg.vm.provision :shell, path: "bootstrap.sh"
     cfg.vm.synced_folder "./CyberChef/", "/mnt/build"
