@@ -120,11 +120,67 @@ server {
     ssl_dhparam /etc/nginx/dhparam.pem;
     location / {
         try_files \$uri \$uri/ =404;
+        # Authentication
+        #auth_basic "CyberChef login";
+        #auth_basic_user_file /etc/nginx/.htpasswd;
+        # Access log for cyberchef
+        access_log /var/log/nginx/cyberchef.access.log;
     }
   }
 
 __EOF__
     /usr/bin/logger 'configure_nginx() finished' -t 'CyberChef-20211226';
+}
+
+configure_nginx_auth() {
+    /usr/bin/logger 'configure_nginx_auth()' -t 'CyberChef-20211226';
+    openssl dhparam -out /etc/nginx/dhparam.pem 2048 &>/dev/null
+    # TLS
+    cat << __EOF__ > /etc/nginx/sites-available/default;
+#
+# Changed by: Martin Boller
+# Last Update: 2021-11-26
+#
+# Web Server for CyberChef
+# Running on, or redirecting to, port 443 TLS
+##
+
+server {
+    listen 80;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    client_max_body_size 32M;
+    listen 443 ssl http2;
+    root /var/www/CyberChef;
+    index index.html;
+    ssl_certificate           /etc/nginx/certs/$HOSTNAME.crt;
+    ssl_certificate_key       /etc/nginx/certs/$HOSTNAME.key;
+    ssl on;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
+    ssl_prefer_server_ciphers on;
+    # Enable HSTS
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    # Optimize session cache
+    ssl_session_cache   shared:SSL:40m;
+    ssl_session_timeout 4h;  # Enable session tickets
+    ssl_session_tickets on;
+    # Diffie Hellman Parameters
+    ssl_dhparam /etc/nginx/dhparam.pem;
+    location / {
+        try_files \$uri \$uri/ =404;
+        # Authentication
+        auth_basic "CyberChef login";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        # Access log for cyberchef
+        access_log /var/log/nginx/cyberchef.access.log;
+    }
+}
+
+__EOF__
+    /usr/bin/logger 'configure_nginx_auth() finished' -t 'CyberChef-20211226';
 }
 
 nginx_certificates() {
@@ -315,7 +371,7 @@ __EOF__
     ## make the script executable
     chmod +x /etc/network/if-up.d/firewallrules;
     # Apply firewall rules for the first time
-    #/etc/network/if-up.d/firewallrules;
+    /etc/network/if-up.d/firewallrules;
     /usr/bin/logger 'configure_iptables() finished' -t 'CyberChef-20211226';
 }
 
@@ -337,13 +393,23 @@ start_services() {
     /usr/bin/logger 'start_services finished' -t 'CyberChef-20211226';
 }
 
+create_htpasswd() {
+    /usr/bin/logger 'create_htpasswd()' -t 'CyberChef-20211226';
+    cyberchef_web_pw="$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 12)"
+    htpasswd -cbB /etc/nginx/.htpasswd cyberchef $cyberchef_web_pw;
+    mkdir /var/lib/cyberchef;
+    echo $cyberchef_web_pw > /var/lib/cyberchef/cyberchef_pw;
+    /usr/bin/logger 'create_htpasswd() finished' -t 'CyberChef-20211226';
+}
+
 ##################################################################################################################
 ## Main                                                                                                          #
 ##################################################################################################################
 
 main() {
-    # CberChef finalized build location
+    # CyberChef finalized build location
     BUILD_LOCATION="/var/www/CyberChef";
+
     # NGINX and certificates
     # Create and Install certificates
     CERTIFICATE_ORG="CyberChef"
@@ -358,8 +424,13 @@ main() {
     #install_nodejs_10;
     # Install and configure NGINX with self-signed certificate
     install_nginx;
+    create_htpasswd;
     nginx_certificates;
+    # Without Authentication (see below)
     configure_nginx;
+    # If you want basic authentication on the web server (htpasswd) use configure_nginx_auth instead of configure_nginx
+    #configure_nginx_auth;
+
     # Copy the finished build from the virtual host server
     obtain_cyberchef_build;
     configure_iptables;
