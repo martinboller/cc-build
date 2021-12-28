@@ -40,7 +40,7 @@ install_prerequisites() {
     update-locale;
     # Other pre-requisites for CyberChef
     apt-get -y install python3-pip python-is-python3 curl gnupg2;
-    apt-get -y install bash-completion git sudo;
+    apt-get -y install bash-completion git iptables;
     # NodeJS 10 required for CyberChef, so going to install NVM to be able to install Node v10.24.1
     curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
     # Installing and enabling node v10.24.1 as default

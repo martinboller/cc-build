@@ -36,7 +36,7 @@ install_prerequisites() {
     update-locale;
     # Other pre-requisites for CyberChef
     apt-get -y install python3-pip python-is-python3 curl gnupg2;
-    apt-get -y install bash-completion git sudo;
+    apt-get -y install bash-completion git sudo iptables;
 
     # A little apt for cleanup
     apt-get -y install --fix-missing;
