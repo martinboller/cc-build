@@ -154,7 +154,6 @@ nginx_certificates() {
     ## NGINX stuff
     ## Required information for NGINX certificates
     # organization name
-    # (see also https://www.switch.ch/pki/participants/)
     export ORGNAME=$CERTIFICATE_ORG
     # the fully qualified server (or service) name, change if other servicename than hostname
     export FQDN=$HOSTNAME;
@@ -184,6 +183,7 @@ countryName         = $ISOCOUNTRY
 stateOrProvinceName = $PROVINCE
 localityName        = $LOCALITY
 organizationName    = $ORGNAME
+organizationalUnitName = $ORGUNIT
 CN = $FQDN
 
 [ req_ext ]
@@ -235,6 +235,7 @@ main() {
     CERTIFICATE_COUNTRY="DK"
     CA_CERTIFICATE_STATE="Denmark"
     CERTIFICATE_LOCALITY="Copenhagen"
+    ORGUNIT="Security"
     install_prerequisites;
     obtain_cyberchef;
     # To test the build immediately install and configure NGINX with certificates (uncomment below)

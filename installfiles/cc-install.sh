@@ -5,8 +5,8 @@
 # Author:       Martin Boller                                               #
 #                                                                           #
 # Email:        martin                                                      #
-# Last Update:  2021-12-26                                                  #
-# Version:      1.00                                                        #
+# Last Update:  2021-12-29                                                  #
+# Version:      1.10                                                        #
 #                                                                           #
 # Changes:      Initial Version (1.00)                                      #
 #                                                                           #
@@ -16,9 +16,8 @@
 #                                                                           #
 #############################################################################
 
-
 install_prerequisites() {
-    /usr/bin/logger 'install_prerequisites' -t 'CyberChef-20211226';
+    /usr/bin/logger 'install_prerequisites' -t 'CyberChef-20211229';
     echo -e "\e[1;32m--------------------------------------------\e[0m";
     echo -e "\e[1;32mInstalling Prerequisite packages\e[0m";
     export DEBIAN_FRONTEND=noninteractive;
@@ -27,7 +26,7 @@ install_prerequisites() {
     . /etc/os-release
     OS=$NAME
     VER=$VERSION_ID
-    /usr/bin/logger "Operating System: $OS Version: $VER" -t 'CyberChef-20211226';
+    /usr/bin/logger "Operating System: $OS Version: $VER" -t 'CyberChef-20211229';
     echo -e "\e[1;32mOperating System: $OS Version: $VER\e[0m";
     # Install prerequisites
     apt-get update;
@@ -47,42 +46,52 @@ install_prerequisites() {
     apt-get -y clean;
     # Python pip packages
     python3 -m pip install --upgrade pip;
-    /usr/bin/logger 'install_prerequisites finished' -t 'CyberChef-20211226';
+    echo -e "\e[32minstall_prerequisites() finished\e[0m";
+    /usr/bin/logger 'install_prerequisites() finished' -t 'CyberChef-20211229';
 }
 
 install_nodejs_10() {
     # NodeJS 10 required for CyberChef, so going to install NVM to install Node v10.24.1
-    /usr/bin/logger 'install_nodejs_10()' -t 'CyberChef-20211226';
+    /usr/bin/logger 'install_nodejs_10()' -t 'CyberChef-20211229';
+    echo -e "\e[32minstall_nodejs_10()\e[0m";
     curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
     source ~/.bashrc;
     nvm install v10.24.1;
     nvm use v10.24.1;
-    /usr/bin/logger 'install_nodejs_10() finished' -t 'CyberChef-20211226';
+    echo -e "\e[32minstall_nodejs_10() finished\e[0m";
+    /usr/bin/logger 'install_nodejs_10() finished' -t 'CyberChef-20211229';
 }
 
 install_nodejs_debian_repo() {
-    /usr/bin/logger 'install_nodejs_debian_repo()' -t 'CyberChef-20211226';
+    /usr/bin/logger 'install_nodejs_debian_repo()' -t 'CyberChef-20211229';
+    echo -e "\e[32minstall_nodejs_debian_repo()\e[0m";
     apt-get -y install nodejs;
-    /usr/bin/logger 'install_nodejs_debian_repo() finished' -t 'CyberChef-20211226';
+    echo -e "\e[32minstall_nodejs_debian_repo() finished\e[0m";
+    /usr/bin/logger 'install_nodejs_debian_repo() finished' -t 'CyberChef-20211229';
 }
 
 obtain_cyberchef_build() {
-    /usr/bin/logger 'obtain_cyberchef_build()' -t 'CyberChef-20211226';
+    /usr/bin/logger 'obtain_cyberchef_build()' -t 'CyberChef-20211229';
+    echo -e "\e[32mobtain_cyberchef_build()\e[0m";
     mkdir -p $BUILD_LOCATION;
     cp -r /mnt/build/* $BUILD_LOCATION;
     sync;
     chown -R www-data:www-data $BUILD_LOCATION;
-    /usr/bin/logger 'obtain_cyberchef_build() finished' -t 'CyberChef-20211226';
+    echo -e "\e[32miobtain_cyberchef_build() finished\e[0m";
+    /usr/bin/logger 'obtain_cyberchef_build() finished' -t 'CyberChef-20211229';
 }
 
 install_nginx() {
-    /usr/bin/logger 'install_nginx()' -t 'CyberChef-20211226';
+    /usr/bin/logger 'install_nginx()' -t 'CyberChef-20211229';
+    echo -e "\e[32mobtain_nginx()\e[0m";
     apt-get -y install nginx apache2-utils;
-    /usr/bin/logger 'install_nginx() finished' -t 'CyberChef-20211226';
+    echo -e "\e[32mobtain_nginx() finished\e[0m";
+    /usr/bin/logger 'install_nginx() finished' -t 'CyberChef-20211229';
 }
 
 configure_nginx() {
-    /usr/bin/logger 'configure_nginx()' -t 'CyberChef-20211226';
+    /usr/bin/logger 'configure_nginx()' -t 'CyberChef-20211229';
+    echo -e "\e[32mconfigure_nginx()\e[0m";
     openssl dhparam -out /etc/nginx/dhparam.pem 2048 &>/dev/null
     # TLS
     cat << __EOF__ > /etc/nginx/sites-available/default;
@@ -129,68 +138,27 @@ server {
   }
 
 __EOF__
-    /usr/bin/logger 'configure_nginx() finished' -t 'CyberChef-20211226';
+    echo -e "\e[32mconfigure_nginx() finished\e[0m";
+    /usr/bin/logger 'configure_nginx() finished' -t 'CyberChef-20211229';
 }
 
 configure_nginx_auth() {
-    /usr/bin/logger 'configure_nginx_auth()' -t 'CyberChef-20211226';
-    openssl dhparam -out /etc/nginx/dhparam.pem 2048 &>/dev/null
-    # TLS
-    cat << __EOF__ > /etc/nginx/sites-available/default;
-#
-# Changed by: Martin Boller
-# Last Update: 2021-11-26
-#
-# Web Server for CyberChef
-# Running on, or redirecting to, port 443 TLS
-##
-
-server {
-    listen 80;
-    return 301 https://\$host\$request_uri;
-}
-
-server {
-    client_max_body_size 32M;
-    listen 443 ssl http2;
-    root /var/www/CyberChef;
-    index index.html;
-    ssl_certificate           /etc/nginx/certs/$HOSTNAME.crt;
-    ssl_certificate_key       /etc/nginx/certs/$HOSTNAME.key;
-    ssl on;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
-    ssl_prefer_server_ciphers on;
-    # Enable HSTS
-    add_header Strict-Transport-Security "max-age=31536000" always;
-    # Optimize session cache
-    ssl_session_cache   shared:SSL:40m;
-    ssl_session_timeout 4h;  # Enable session tickets
-    ssl_session_tickets on;
-    # Diffie Hellman Parameters
-    ssl_dhparam /etc/nginx/dhparam.pem;
-    location / {
-        try_files \$uri \$uri/ =404;
-        # Authentication
-        auth_basic "CyberChef login";
-        auth_basic_user_file /etc/nginx/.htpasswd;
-        # Access log for cyberchef
-        access_log /var/log/nginx/cyberchef.access.log;
-    }
-}
-
-__EOF__
-    /usr/bin/logger 'configure_nginx_auth() finished' -t 'CyberChef-20211226';
+    /usr/bin/logger 'configure_nginx_auth()' -t 'CyberChef-20211229';
+    echo -e "\e[32mconfigure_nginx_auth()\e[0m";
+    sed -i -e 's/#auth_basic "CyberChef login"/auth_basic "CyberChef login"/' /etc/nginx/sites-available/default;
+    sed -i -e 's/#auth_basic_user_file \/etc\/nginx\/.htpasswd/auth_basic_user_file \/etc\/nginx\/.htpasswd/' /etc/nginx/sites-available/default;
+    echo -e "\e[32mconfigure_nginx_auth() finished\e[0m";
+    /usr/bin/logger 'configure_nginx_auth() finished' -t 'CyberChef-20211229';
 }
 
 nginx_certificates() {
     ## Use this if you want to create a request to send to corporate PKI for the web interface, also change the NGINX config to use that
-    /usr/bin/logger 'nginx_certificates()' -t 'CyberChef-20211226';
+    /usr/bin/logger 'nginx_certificates()' -t 'CyberChef-20211229';
+    echo -e "\e[32mnginx_certificates()\e[0m";
 
     ## NGINX stuff
     ## Required information for NGINX certificates
     # organization name
-    # (see also https://www.switch.ch/pki/participants/)
     export ORGNAME=$CERTIFICATE_ORG
     # the fully qualified server (or service) name, change if other servicename than hostname
     export FQDN=$HOSTNAME;
@@ -220,6 +188,8 @@ countryName         = $ISOCOUNTRY
 stateOrProvinceName = $PROVINCE
 localityName        = $LOCALITY
 organizationName    = $ORGNAME
+organizationalUnitName = $ORGUNIT
+
 CN = $FQDN
 
 [ req_ext ]
@@ -231,11 +201,12 @@ __EOF__
     # generate self-signed certificate (remove when CSR can be sent to Corp PKI)
     openssl x509 -in /etc/nginx/certs/$HOSTNAME.csr -out /etc/nginx/certs/$HOSTNAME.crt -req -signkey /etc/nginx/certs/$HOSTNAME.key -days 365
     chmod 600 /etc/nginx/certs/$HOSTNAME.key
-    /usr/bin/logger 'nginx_certificates() finished' -t 'CyberChef-20211226';
+    echo -e "\e[32mnginx_certificates finished\e[0m";
+    /usr/bin/logger 'nginx_certificates() finished' -t 'CyberChef-20211229';
 }
 
 configure_iptables() {
-    /usr/bin/logger 'configure_iptables()' -t 'CyberChef-20211226';
+    /usr/bin/logger 'configure_iptables()' -t 'CyberChef-20211229';
     echo -e "\e[32mconfigure_iptables()\e[0m";
     echo -e "\e[32m-Creating iptables rules file\e[0m";
     cat << __EOF__  >> /etc/network/iptables.rules
@@ -372,11 +343,13 @@ __EOF__
     chmod +x /etc/network/if-up.d/firewallrules;
     # Apply firewall rules for the first time
     /etc/network/if-up.d/firewallrules;
-    /usr/bin/logger 'configure_iptables() finished' -t 'CyberChef-20211226';
+    echo -e "\e[32mconfigure_iptables finished\e[0m";
+    /usr/bin/logger 'configure_iptables() finished' -t 'CyberChef-20211229';
 }
 
 start_services() {
-    /usr/bin/logger 'start_services' -t 'CyberChef-20211226';
+    /usr/bin/logger 'start_services' -t 'CyberChef-20211229';
+    echo -e "\e[32mstart_services() finished\e[0m";
     # Load new/changed systemd-unitfiles
     systemctl daemon-reload;
     systemctl restart nginx.service;
@@ -384,22 +357,51 @@ start_services() {
     echo -e "\e[1;32mChecking core daemons for CyberChef......\e[0m";
     if systemctl is-active --quiet nginx.service;
     then
-        /usr/bin/logger 'nginx.service started successfully' -t 'CyberChef-20211226';
+        /usr/bin/logger 'nginx.service started successfully' -t 'CyberChef-20211229';
         echo -e "\e[1;32mnginx.service started successfully\e[0m";
     else
-        /usr/bin/logger 'nginx.service FAILED!' -t 'CyberChef-20211226';
+        /usr/bin/logger 'nginx.service FAILED!' -t 'CyberChef-20211229';
         echo -e "\e[1;32mnginx.service FAILED! check logs and certificates\e[0m";
     fi
-    /usr/bin/logger 'start_services finished' -t 'CyberChef-20211226';
+    echo -e "\e[32mstart_services finished\e[0m";
+    /usr/bin/logger 'start_services finished' -t 'CyberChef-20211229';
 }
 
-create_htpasswd() {
-    /usr/bin/logger 'create_htpasswd()' -t 'CyberChef-20211226';
-    cyberchef_web_pw="$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 12)"
-    htpasswd -cbB /etc/nginx/.htpasswd cyberchef $cyberchef_web_pw;
+create_web_user() {
+    /usr/bin/logger 'create_web_user()' -t 'CyberChef-20211229';
+    echo -e "\e[32mcreate_web_user() finished\e[0m";
+    htpasswd -cbB /etc/nginx/.htpasswd $cyberchef_web_user $cyberchef_web_pw;
     mkdir /var/lib/cyberchef;
-    echo $cyberchef_web_pw > /var/lib/cyberchef/cyberchef_pw;
-    /usr/bin/logger 'create_htpasswd() finished' -t 'CyberChef-20211226';
+    echo "created user: $cyberchef_web_user with password: $cyberchef_web_pw" > /var/lib/cyberchef/web_user;
+    echo -e "\e[32mcreate_web_user() finished\e[0m";
+    /usr/bin/logger 'create_web_user() finished' -t 'CyberChef-20211229';
+}
+
+disable_sshd_password() {
+    /usr/bin/logger 'disable_sshd_password())' -t 'CyberChef-20211229';
+    echo -e "\e[32mdisable_sshd_password()\e[0m";
+    # Disable password authN
+    echo "PasswordAuthentication no" | tee -a /etc/ssh/sshd_config
+    sync;
+    echo -e "\e[32mdisable_sshd_password() finished\e[0m";
+    /usr/bin/logger 'disable_sshd_password())' -t 'CyberChef-20211229';
+}
+
+disable_vagrant_user() {
+    /usr/bin/logger 'disable_vagrant_user()' -t 'CyberChef-20211229';
+    randompw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 64 | tr -d '\n');
+    echo vagrant:$randompw | chpasswd;
+    usermod vagrant --lock;
+    /usr/bin/logger 'disable_vagrant_user()' -t 'CyberChef-20211229';
+}
+
+create_linux_user() {
+    /usr/bin/logger 'create_linux_user()' -t 'CyberChef-20211229';
+    mkdir /var/lib/cyberchef;
+    # Create user
+    /usr/sbin/useradd -p $(openssl passwd -1 ${cyberchef_linux_pw}) -c "CyberChef User" --groups sudo --create-home --shell /bin/bash $cyberchef_linux_user;
+    echo "created user: $cyberchef_linux_user with password: $cyberchef_linux_pw" > /var/lib/cyberchef/linux_user;
+    /usr/bin/logger 'create_linux_user()' -t 'CyberChef-20211229';
 }
 
 ##################################################################################################################
@@ -409,33 +411,51 @@ create_htpasswd() {
 main() {
     # CyberChef finalized build location
     BUILD_LOCATION="/var/www/CyberChef";
+    # User for linux maintenance
+    cyberchef_linux_pw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 16 | tr -d '\n');
+    cyberchef_linux_user=cyberchef;
+    # User for basic authentication with NGINX
+    cyberchef_web_user=cyberchef;
+    cyberchef_web_pw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 12 | tr -d '\n');
 
+    ###############################################################################################################
     # NGINX and certificates
     # Create and Install certificates
     CERTIFICATE_ORG="CyberChef"
     # Local information
     CERTIFICATE_COUNTRY="DK"
     CA_CERTIFICATE_STATE="Denmark"
-    CERTIFICATE_LOCALITY="Aabenraa"
+    CERTIFICATE_LOCALITY="Copenhagen"
+    ORGUNIT="Security"
+
+    ###############################################################################################################
     # Install requirements
     install_prerequisites;
+    # Create the linux user with sudo group membership
+    create_linux_user;
     # Install the version of node you want (default "debian repo provided")
     install_nodejs_debian_repo;
     #install_nodejs_10;
     # Install and configure NGINX with self-signed certificate
     install_nginx;
-    create_htpasswd;
+    create_web_user;
     nginx_certificates;
     # Without Authentication (see below)
     configure_nginx;
     # If you want basic authentication on the web server (htpasswd) use configure_nginx_auth instead of configure_nginx
     #configure_nginx_auth;
 
+    ###############################################################################################################
     # Copy the finished build from the virtual host server
     obtain_cyberchef_build;
     configure_iptables;
     # Restart NGINX
     start_services;
+
+    ###############################################################################################################
+    # If you have added your own Public SSH key, you should disable passwords over ssh and disable vagrant user
+    disable_sshd_password;
+    disable_vagrant_user;
 }
 
 main;
