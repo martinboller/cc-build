@@ -95,13 +95,14 @@ configure_nginx() {
     openssl dhparam -out /etc/nginx/dhparam.pem 2048 &>/dev/null
     # TLS
     cat << __EOF__ > /etc/nginx/sites-available/default;
-#
-# Changed by: Martin Boller
-# Last Update: 2021-11-26
-#
-# Web Server for CyberChef
-# Running on, or redirecting to, port 443 TLS
-##
+#########################################################
+# Changed by: Martin Boller                             #
+# Last Update: 2021-11-29                               #
+#                                                       #
+# Web Server for CyberChef                              #
+# Running on port 443 TLS. Port 80 redirecting to 443   #
+#                                                       # 
+#########################################################
 
 server {
     listen 80;
@@ -132,8 +133,9 @@ server {
         # Authentication
         #auth_basic "CyberChef login";
         #auth_basic_user_file /etc/nginx/.htpasswd;
-        # Access log for cyberchef
+        # Access and error log for cyberchef
         access_log /var/log/nginx/cyberchef.access.log;
+        error_log /var/log/nginx/cyberchef.error.log warn;
     }
   }
 

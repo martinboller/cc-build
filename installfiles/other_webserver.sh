@@ -134,6 +134,7 @@ server {
         #auth_basic_user_file /etc/nginx/.htpasswd;
         # Access log for cyberchef
         access_log /var/log/nginx/cyberchef.access.log;
+        error_log /var/log/nginx/cyberchef.error.log warn;
     }
   }
 

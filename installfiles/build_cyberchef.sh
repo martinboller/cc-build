@@ -126,7 +126,6 @@ server {
     index index.html;
     ssl_certificate           /etc/nginx/certs/$HOSTNAME.crt;
     ssl_certificate_key       /etc/nginx/certs/$HOSTNAME.key;
-    ssl on;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
     ssl_prefer_server_ciphers on;
@@ -140,6 +139,9 @@ server {
     ssl_dhparam /etc/nginx/dhparam.pem;
     location / {
         try_files \$uri \$uri/ =404;
+        # Access and error log for cyberchef
+        access_log /var/log/nginx/cyberchef.access.log;
+        error_log /var/log/nginx/cyberchef.error.log debug;
     }
   }
 
