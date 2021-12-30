@@ -19,9 +19,25 @@
 obtain_cyberchef_build() {
     /usr/bin/logger 'obtain_cyberchef_build()' -t 'CyberChef-20211226';
     mkdir -p /var/www/CyberChef/;
+
     echo -e "\e[1;31m--------------------------------------------\e[0m";
-    echo -e "\e[1;31mCopy the finished production build of CyberChef to $BUILD_LOCATION before continuing";
-    read -p "Press Return to continue" Dummy;
+    echo -e "\e[1;31mHave you copied the finished production build of CyberChef to $BUILD_LOCATION?";
+    echo -e "\e[1;31mIt is available on the Virtual host where you ran vagrant up charpentier..";
+    while : ; do
+        read -s -p "Press Y/N key: " -n 1 k <&1
+        k=${k^}
+        echo $k
+        if [[ $k = N ]]; then
+            echo
+            echo "abort"    
+            exit
+        fi
+        if [[ $k = Y ]]; then
+            echo
+            echo "Installing CyberChef"
+            break
+        fi    
+    done
     echo -e "\e[0m"
     chown -R www-data:www-data /var/www/;
     /usr/bin/logger 'obtain_cyberchef_build() finished' -t 'CyberChef-20211226';
@@ -95,13 +111,14 @@ configure_nginx() {
     openssl dhparam -out /etc/nginx/dhparam.pem 2048 &>/dev/null
     # TLS
     cat << __EOF__ > /etc/nginx/sites-available/default;
-#
-# Changed by: Martin Boller
-# Last Update: 2021-11-26
-#
-# Web Server for CyberChef
-# Running on, or redirecting to, port 443 TLS
-##
+#########################################################
+# Changed by: Martin Boller                             #
+# Last Update: 2021-11-29                               #
+#                                                       #
+# Web Server for CyberChef                              #
+# Running on port 443 TLS. Port 80 redirecting to 443   #
+#                                                       # 
+#########################################################
 
 server {
     listen 80;
@@ -132,7 +149,7 @@ server {
         # Authentication
         #auth_basic "CyberChef login";
         #auth_basic_user_file /etc/nginx/.htpasswd;
-        # Access log for cyberchef
+        # Access and error log for cyberchef
         access_log /var/log/nginx/cyberchef.access.log;
         error_log /var/log/nginx/cyberchef.error.log warn;
     }
@@ -371,11 +388,38 @@ start_services() {
 create_web_user() {
     /usr/bin/logger 'create_web_user()' -t 'CyberChef-20211229';
     echo -e "\e[32mcreate_web_user() finished\e[0m";
-    htpasswd -cbB /etc/nginx/.htpasswd cyberchef $cyberchef_web_pw;
+    htpasswd -cbB /etc/nginx/.htpasswd $cyberchef_web_user $cyberchef_web_pw;
     mkdir /var/lib/cyberchef;
-    echo $cyberchef_web_pw > /var/lib/cyberchef/cyberchef_pw;
+    echo "created user: $cyberchef_web_user with password: $cyberchef_web_pw" > /var/lib/cyberchef/web_user;
     echo -e "\e[32mcreate_web_user() finished\e[0m";
     /usr/bin/logger 'create_web_user() finished' -t 'CyberChef-20211229';
+}
+
+disable_sshd_password() {
+    /usr/bin/logger 'disable_sshd_password())' -t 'CyberChef-20211229';
+    echo -e "\e[32mdisable_sshd_password()\e[0m";
+    # Disable password authN
+    echo "PasswordAuthentication no" | tee -a /etc/ssh/sshd_config
+    sync;
+    echo -e "\e[32mdisable_sshd_password() finished\e[0m";
+    /usr/bin/logger 'disable_sshd_password())' -t 'CyberChef-20211229';
+}
+
+disable_vagrant_user() {
+    /usr/bin/logger 'disable_vagrant_user()' -t 'CyberChef-20211229';
+    randompw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 64 | tr -d '\n');
+    echo vagrant:$randompw | chpasswd;
+    usermod vagrant --lock;
+    /usr/bin/logger 'disable_vagrant_user()' -t 'CyberChef-20211229';
+}
+
+create_linux_user() {
+    /usr/bin/logger 'create_linux_user()' -t 'CyberChef-20211229';
+    mkdir /var/lib/cyberchef;
+    # Create user
+    /usr/sbin/useradd -p $(openssl passwd -1 ${cyberchef_linux_pw}) -c "CyberChef User" --groups sudo --create-home --shell /bin/bash $cyberchef_linux_user;
+    echo "created user: $cyberchef_linux_user with password: $cyberchef_linux_pw" > /var/lib/cyberchef/linux_user;
+    /usr/bin/logger 'create_linux_user()' -t 'CyberChef-20211229';
 }
 
 ##################################################################################################################
@@ -383,23 +427,33 @@ create_web_user() {
 ##################################################################################################################
 
 main() {
-    # Some variables to use with build
+    # CyberChef finalized build location
     BUILD_LOCATION="/var/www/CyberChef";
+    # User for linux maintenance
+    cyberchef_linux_pw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 16 | tr -d '\n');
+    cyberchef_linux_user=cyberchef;
     # User for basic authentication with NGINX
     cyberchef_web_user=cyberchef;
-    cyberchef_web_pw="$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 12)";
+    cyberchef_web_pw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 12 | tr -d '\n');
 
-    obtain_cyberchef_build;
+    ###############################################################################################################
     # NGINX and certificates
     # Create and Install certificates
     CERTIFICATE_ORG="CyberChef"
     # Local information
     CERTIFICATE_COUNTRY="DK"
     CA_CERTIFICATE_STATE="Denmark"
-    CERTIFICATE_LOCALITY="Aabenraa"
-    ORG_UNIT="Security"
+    CERTIFICATE_LOCALITY="Copenhagen"
+    ORGUNIT="Security"
+    
+    # Ensure the finished build from the virtual host server is copied to the webserver
+    obtain_cyberchef_build;
+   
+    ###############################################################################################################
     # Install requirements
     install_prerequisites;
+    # Create the linux user with sudo group membership
+    create_linux_user;
     # Install the version of node you want (default "debian repo provided")
     install_nodejs_debian_repo;
     #install_nodejs_10;
@@ -411,10 +465,16 @@ main() {
     configure_nginx;
     # If you want basic authentication on the web server (htpasswd) use configure_nginx_auth instead of configure_nginx
     #configure_nginx_auth;
-    # Copy the finished build from the virtual host server
-    configure_iptables
+
+    ###############################################################################################################
+    configure_iptables;
     # Restart NGINX
     start_services;
+
+    ###############################################################################################################
+    # If you have added your own Public SSH key, you should disable passwords over ssh and disable vagrant user
+    disable_sshd_password;
+    disable_vagrant_user;
 }
 
 main;

@@ -94,11 +94,13 @@ main() {
     
     if [ "$HOSTNAME" = "charpentier" ];
     then
+      echo -e "\e[1;31mInstalling buildserver $HOSTNAME and building production CyberChef Build\e[0m";
       /root/build_cyberchef.sh;
     fi
     
     if [ "$HOSTNAME" = "cyberchef" ];
     then
+      echo -e "\e[1;31mInstalling CyberChef Virtual Webserver $HOSTNAME\e[0m";
       /root/cc-install.sh;
     fi
 
