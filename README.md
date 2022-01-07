@@ -17,6 +17,9 @@ The final build of CyberChef will be located in
 
 ## Latest changes
 
+### 2022-01-07 - Less verbose output
+- Less cluttered console during installation due to less verbose output
+
 ### 2021-12-26 - First commit
 - Two virtual machines created. Remove the first after successful installation of both servers.
 - \# vagrant destroy charpentier
