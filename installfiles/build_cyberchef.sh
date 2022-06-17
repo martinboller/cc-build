@@ -87,24 +87,19 @@ install_cyberchef() {
     npm install -g grunt-cli  > /dev/null 2>&1;
     echo -e "\e[1;36m ... install grunt\e[0m";
     npm install grunt > /dev/null 2>&1;
-
+    /usr/bin/logger 'Cleanup CyberChef for building' -t 'CyberChef-20220107';
+    echo -e "\e[1;36m ... Cleanup CyberChef for building
+    \e[0m";
+    rm -fr ./build ./node_modules package-lock.json 
+    git checkout . 
     /usr/bin/logger 'npm Install CyberChef' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... npm install CyberChef\e[0m";
-    npm --experimental-modules --unsafe-perm install > /dev/null 2>&1;
-
-    /usr/bin/logger 'npm rebuild CyberChef' -t 'CyberChef-20220107';
-    echo -e "\e[1;36m ... npm rebuild CyberChef\e[0m";
-    npm --experimental-modules --unsafe-perm rebuild > /dev/null 2>&1;
-
-    /usr/bin/logger 'audit and fix NPM modules CyberChef' -t 'CyberChef-20220107';
-    echo -e "\e[1;36m ... audit and fix npm modules CyberChef\e[0m";
-    npm --experimental-modules --unsafe-perm audit fix --force > /dev/null 2>&1;
-
+    npm install    
     /usr/bin/logger 'creating production build of CyberChef' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... creating production build of CyberChef\e[0m";
     echo -e "\e[1;36m ... - This will take a few minutes - ...\e[0m";
-    grunt prod --force > /dev/null 2>&1;
-
+    time ./node_modules/grunt/bin/grunt prod --force
+    
     /usr/bin/logger 'Set permissions' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... Setting permissions on build directory\e[0m";
     chown -R www-data:www-data $BUILD_LOCATION  > /dev/null 2>&1;
@@ -280,7 +275,10 @@ main() {
     shopt -s expand_aliases
     alias redir='> /dev/null 2>&1'
     #alias redir=''
-  
+
+    # Experienced issues with vagrant/virtualbox/eth0, so down/up'ing that
+    ifdown eth0; 
+    ifup eth0;
     # installation
     install_prerequisites;
     obtain_cyberchef;
