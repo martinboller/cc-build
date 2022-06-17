@@ -88,8 +88,9 @@ install_cyberchef() {
     echo -e "\e[1;36m ... install grunt\e[0m";
     npm install grunt > /dev/null 2>&1;
     /usr/bin/logger 'Cleanup CyberChef for building' -t 'CyberChef-20220107';
-    echo -e "\e[1;36m ... Cleanup CyberChef for building
-    \e[0m";
+    echo -e "\e[1;36m ... Cleanup CyberChef for building\e[0m";
+    # https://github.com/gchq/CyberChef/issues/575
+    ## rm -fr ./build ./node_modules package-lock.json && git checkout . && npm install && time ./node_modules/grunt/bin/grunt prod --force
     rm -fr ./build ./node_modules package-lock.json 
     git checkout . 
     /usr/bin/logger 'npm Install CyberChef' -t 'CyberChef-20220107';
