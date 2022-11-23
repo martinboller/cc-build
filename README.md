@@ -11,11 +11,15 @@ The final build of CyberChef will be located in
   - Create another Virtual Server using NGINX as the webserver for the build created in the previous step. This has the hostname *cyberchef*.
   - Alternatively copy the build to another Web Server and install NGINX there.
 
-<b>Note:</b> CyberChef will only build on Node 10, but appear to run nicely on newer version. Therefore the actual web-server will be running the Package in the Debian repositories.
+<b>Note:</b> CyberChef now supports Node 16. For a long time Node 10 was a requirement which became an issue.
 
 ----
 
 ## Latest changes
+
+### 2022-11-23 - Latest version of CyberChef and Node 16
+- Not sure how long this has been broken, but now tested with the latest version (2022-11-11) of CyberChef which runs on Node 16
+
 
 ### 2022-01-07 - Less verbose output
 - Less cluttered console during installation due to less verbose output
