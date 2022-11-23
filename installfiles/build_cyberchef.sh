@@ -33,30 +33,30 @@ install_prerequisites() {
     echo -e "\e[1;32m - Operating System: $OS Version: $VER\e[0m";
  
     # Install prerequisites
-    apt-get -qq update;
+    apt-get -qq update > /dev/null 2>&1;
     # Set correct locale
-    #locale-gen;
-    #update-locale;
+    #locale-gen > /dev/null 2>&1;
+    #update-locale > /dev/null 2>&1;
     # Other pre-requisites for CyberChef
-    apt-get -y -qq install python3-pip python-is-python3 curl gnupg2;
-    apt-get -y -qq install bash-completion git iptables;
+    apt-get -y -qq install python3-pip python-is-python3 curl gnupg2 > /dev/null 2>&1;
+    apt-get -y -qq install bash-completion git iptables > /dev/null 2>&1;
     # NodeJS 10 required for CyberChef, so going to install NVM to be able to install Node v10.24.1
     curl -s https://raw.githubusercontent.com/creationix/nvm/master/install.sh > ./installnvm.sh
-    chmod 744 installnvm.sh;
-    ./installnvm.sh;
+    chmod 744 installnvm.sh > /dev/null 2>&1;
+    ./installnvm.sh > /dev/null 2>&1;
     # Installing and enabling node v10.24.1 as default
     source ~/.bashrc;
-    nvm install v10.24.1;
-    nvm use v10.24.1;
+    nvm install v16 > /dev/null 2>&1;
+    #nvm use v10.24.1 > /dev/null 2>&1;
     # A little apt
-    apt-get -y -qq install --fix-missing;
-    apt-get -qq update;
-    apt-get -y -qq full-upgrade;
-    apt-get -y -qq autoremove --purge;
-    apt-get -y -qq autoclean;
-    apt-get -y -qq clean;
+    apt-get -y -qq install --fix-missing > /dev/null 2>&1;
+    apt-get -qq update > /dev/null 2>&1;
+    apt-get -y -qq full-upgrade > /dev/null 2>&1;
+    apt-get -y -qq autoremove --purge > /dev/null 2>&1;
+    apt-get -y -qq autoclean > /dev/null 2>&1;
+    apt-get -y -qq clean > /dev/null 2>&1;
     # Python pip packages
-    python3 -m pip install --upgrade pip;
+    python3 -m pip install --upgrade pip > /dev/null 2>&1;
     echo -e "\e[1;32m - Installing Prerequisite packages finished\e[0m";
     /usr/bin/logger 'install_prerequisites finished' -t 'CyberChef-20220107';
 }
@@ -65,9 +65,9 @@ obtain_cyberchef() {
     /usr/bin/logger 'obtain_cyberchef()' -t 'CyberChef-20220107';
     echo -e "\e[1;32m-------------------------------------------\e[0m";
     echo -e "\e[1;32m - obtain_cyberchef\e[0m";
-    cd /opt/;
+    cd /opt/ > /dev/null 2>&1;
     # Get latest version from GitHub
-    git clone --quiet https://github.com/gchq/CyberChef.git;
+    git clone --quiet https://github.com/gchq/CyberChef.git > /dev/null 2>&1;
     sync;
     echo -e "\e[1;32m - obtain_cyberchef finished\e[0m";
     /usr/bin/logger 'obtain_cyberchef() finished' -t 'CyberChef-20220107';
@@ -78,36 +78,36 @@ install_cyberchef() {
     echo -e "\e[1;32m-------------------------------------------\e[0m";
     echo -e "\e[1;32m - install_cyberchef\e[0m";
     export NODE_OPTIONS=--max_old_space_size=2048
-    cd /opt/CyberChef/;
+    cd /opt/CyberChef/ > /dev/null 2>&1;
     /usr/bin/logger 'fix for fixCryptoApiImports()' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... fix for fixCryptoApiImports()\e[0m";
-    sed -ie '/fixCryptoApiImports: {/a\        options: {shell: "/bin/bash"},' Gruntfile.js
+    sed -ie '/fixCryptoApiImports: {/a\        options: {shell: "/bin/bash"},' Gruntfile.js > /dev/null 2>&1
     /usr/bin/logger 'install grunt components required' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... install grunt-cli\e[0m";
-    npm install -g grunt-cli ;
+    npm install -g grunt-cli  > /dev/null 2>&1;
     echo -e "\e[1;36m ... install grunt\e[0m";
-    npm install grunt;
+    npm install grunt > /dev/null 2>&1;
 
     /usr/bin/logger 'npm Install CyberChef' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... npm install CyberChef\e[0m";
-    npm --experimental-modules --unsafe-perm install;
+    npm --experimental-modules --unsafe-perm install > /dev/null 2>&1;
 
     /usr/bin/logger 'npm rebuild CyberChef' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... npm rebuild CyberChef\e[0m";
-    npm --experimental-modules --unsafe-perm rebuild;
+    npm --experimental-modules --unsafe-perm rebuild > /dev/null 2>&1;
 
     /usr/bin/logger 'audit and fix NPM modules CyberChef' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... audit and fix npm modules CyberChef\e[0m";
-    npm --experimental-modules --unsafe-perm audit fix --force;
+    npm --experimental-modules --unsafe-perm audit fix --force > /dev/null 2>&1;
 
     /usr/bin/logger 'creating production build of CyberChef' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... creating production build of CyberChef\e[0m";
     echo -e "\e[1;36m ... - This will take a few minutes - ...\e[0m";
-    grunt prod --force;
+    grunt prod --force > /dev/null 2>&1;
 
     /usr/bin/logger 'Set permissions' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... Setting permissions on build directory\e[0m";
-    chown -R www-data:www-data $BUILD_LOCATION ;
+    chown -R www-data:www-data $BUILD_LOCATION  > /dev/null 2>&1;
     echo -e "\e[1;32m - install_cyberchef finished\e[0m";
     /usr/bin/logger 'install_cyberchef()' -t 'CyberChef-20220107';
 }
@@ -116,7 +116,7 @@ install_nginx() {
     /usr/bin/logger 'install_nginx()' -t 'CyberChef-20220107';
     echo -e "\e[1;32m-------------------------------------------\e[0m";
     echo -e "\e[1;32m - install_nginx\e[0m";
-    apt-get -y -qq install nginx apache2-utils;
+    apt-get -y -qq install nginx apache2-utils > /dev/null 2>&1;
     echo -e "\e[1;32m - install_nginx finished\e[0m";
     /usr/bin/logger 'install_nginx() finished' -t 'CyberChef-20220107';
 }
@@ -195,7 +195,7 @@ nginx_certificates() {
     # resolve to the same IP address as the FQDN.
     export ALTNAMES=DNS:$HOSTNAME   # , DNS:bar.example.org , DNS:www.foo.example.org
     echo -e "\e[1;36m ... create certs directory\e[0m";
-    mkdir -p /etc/nginx/certs/ ;
+    mkdir -p /etc/nginx/certs/  > /dev/null 2>&1;
     echo -e "\e[1;36m ... create openssl.cnf\e[0m";
     cat << __EOF__ > ./openssl.cnf
 ## Request for $FQDN
@@ -221,11 +221,11 @@ __EOF__
     sync;
     # generate Certificate Signing Request to send to corp PKI
     echo -e "\e[1;36m ... generate Certificate Signing Request to send to corp PKI\e[0m";
-    openssl req -new -config openssl.cnf -keyout /etc/nginx/certs/$HOSTNAME.key -out /etc/nginx/certs/$HOSTNAME.csr
+    openssl req -new -config openssl.cnf -keyout /etc/nginx/certs/$HOSTNAME.key -out /etc/nginx/certs/$HOSTNAME.csr > /dev/null 2>&1
     # generate self-signed certificate (remove when CSR can be sent to Corp PKI)
     echo -e "\e[1;36m ... generate self-signed certificate\e[0m";
-    openssl x509 -in /etc/nginx/certs/$HOSTNAME.csr -out /etc/nginx/certs/$HOSTNAME.crt -req -signkey /etc/nginx/certs/$HOSTNAME.key -days 365 
-    chmod 600 /etc/nginx/certs/$HOSTNAME.key
+    openssl x509 -in /etc/nginx/certs/$HOSTNAME.csr -out /etc/nginx/certs/$HOSTNAME.crt -req -signkey /etc/nginx/certs/$HOSTNAME.key -days 365  > /dev/null 2>&1
+    chmod 600 /etc/nginx/certs/$HOSTNAME.key > /dev/null 2>&1
     echo -e "\e[1;32m - nginx_certificates finished\e[0m";
     /usr/bin/logger 'nginx_certificates() finished' -t 'CyberChef-20220107';
 }
@@ -234,7 +234,7 @@ copy_build_2_host() {
     /usr/bin/logger 'copy_build_2_host()' -t 'CyberChef-20220107';
     echo -e "\e[1;32m-------------------------------------------\e[0m";
     echo -e "\e[1;32m - copy_build_2_host()\e[0m";
-    cp -r $BUILD_LOCATION/* /mnt/build/ ;
+    cp -r $BUILD_LOCATION/* /mnt/build/  > /dev/null 2>&1;
     echo -e "\e[1;32m - copy_build_2_host() finished\e[0m";
     /usr/bin/logger 'copy_build_2_host() finished' -t 'CyberChef-20220107';
 }
@@ -244,8 +244,8 @@ start_services() {
     echo -e "\e[1;32m-------------------------------------------\e[0m";
     echo -e "\e[1;32m - start_services()\e[0m";
     # Load new/changed systemd-unitfiles
-    systemctl daemon-reload;
-    systemctl restart nginx.service;
+    systemctl daemon-reload > /dev/null 2>&1;
+    systemctl restart nginx.service > /dev/null 2>&1;
     echo -e "\e[1;36m ... Checking core daemons for CyberChef......\e[0m";
     if systemctl is-active --quiet nginx.service;
     then
@@ -290,12 +290,12 @@ main() {
 #    configure_nginx;
     install_cyberchef;
     copy_build_2_host;
-    sleep 30;
+    sleep 30 > /dev/null 2>&1;
     echo -e "\e[1;32m - Build Environment main() finished\e[0m";
     echo -e "\e[1;31m - Powering off in 30 seconds!\e[0m";
     echo -e "\e[1;32m-------------------------------------------\e[0m";
     /usr/bin/logger 'Build Environment main() finished' -t 'CyberChef-20220107';
-    systemctl poweroff;
+    systemctl poweroff > /dev/null 2>&1;
 }
 
 main;

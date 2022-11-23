@@ -79,6 +79,9 @@ install_cyberchef() {
     echo -e "\e[1;32m - install_cyberchef\e[0m";
     export NODE_OPTIONS=--max_old_space_size=2048
     cd /opt/CyberChef/;
+    ## rm -fr ./build ./node_modules package-lock.json && git checkout . && npm install && time ./node_modules/grunt/bin/grunt prod --force
+    rm -fr ./build ./node_modules package-lock.json .nvmrc
+    git checkout .
     /usr/bin/logger 'fix for fixCryptoApiImports()' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... fix for fixCryptoApiImports()\e[0m";
     sed -ie '/fixCryptoApiImports: {/a\        options: {shell: "/bin/bash"},' Gruntfile.js
@@ -103,7 +106,7 @@ install_cyberchef() {
     /usr/bin/logger 'creating production build of CyberChef' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... creating production build of CyberChef\e[0m";
     echo -e "\e[1;36m ... - This will take a few minutes - ...\e[0m";
-    grunt prod --force;
+    grunt prod --fix --force;
 
     /usr/bin/logger 'Set permissions' -t 'CyberChef-20220107';
     echo -e "\e[1;36m ... Setting permissions on build directory\e[0m";
