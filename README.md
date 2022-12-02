@@ -17,6 +17,9 @@ The final build of CyberChef will be located in
 
 ## Latest changes
 
+### 2022-12-02 - Tested with CyberChef 9.54.0
+- Build version 9.54.0
+
 ### 2022-11-23 - Latest version of CyberChef and Node 16
 - Not sure how long this has been broken, but now tested with the latest version (2022-11-11) of CyberChef which runs on Node 16
 
