@@ -51,18 +51,18 @@ install_prerequisites() {
     /usr/bin/logger 'install_prerequisites() finished' -t 'CyberChef-20221123';
 }
 
-install_nodejs_10() {
-    # NodeJS 10 required for CyberChef, so going to install NVM to install Node v10.24.1
-    /usr/bin/logger 'install_nodejs_10()' -t 'CyberChef-20221123';
+install_nodejs_nvm() {
+    # NodeJS required for CyberChef, so going to install NVM to install later version that in Debian Repo
+    /usr/bin/logger 'install_nodejs_nvm()' -t 'CyberChef-20221123';
     echo -e "\e[1;32m-------------------------------------------\e[0m";
-    echo -e "\e[1;32m - install_nodejs_10()\e[0m";
+    echo -e "\e[1;32m - install_nodejs_nvm()\e[0m";
     curl -s https://raw.githubusercontent.com/creationix/nvm/master/install.sh > ./installnvm.sh
     chmod 744 installnvm.sh > /dev/null 2>&1;
     ./installnvm.sh > /dev/null 2>&1;source ~/.bashrc > /dev/null 2>&1;
-    nvm install v10.24.1 > /dev/null 2>&1;
-    nvm use v10.24.1 > /dev/null 2>&1;
-    echo -e "\e[1;32m - install_nodejs_10() finished\e[0m";
-    /usr/bin/logger 'install_nodejs_10() finished' -t 'CyberChef-20221123';
+    nvm install v17 > /dev/null 2>&1;
+    nvm use v17 > /dev/null 2>&1;
+    echo -e "\e[1;32m - install_nodejs_nvm() finished\e[0m";
+    /usr/bin/logger 'install_nodejs_nvm() finished' -t 'CyberChef-20221123';
 }
 
 install_nodejs_debian_repo() {
@@ -460,7 +460,9 @@ main() {
     create_linux_user;
     # Install the version of node you want (default "debian repo provided")
     install_nodejs_debian_repo;
-    #install_nodejs_10;
+    # To install a later version of Node than in the Debian Repos use the below instead.
+    #install_nodejs_nvm;
+    
     # Install and configure NGINX with self-signed certificate
     install_nginx;
     create_web_user;

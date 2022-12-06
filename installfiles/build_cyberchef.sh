@@ -44,11 +44,10 @@ install_prerequisites() {
     curl -s https://raw.githubusercontent.com/creationix/nvm/master/install.sh > ./installnvm.sh
     chmod 744 installnvm.sh > /dev/null 2>&1;
     ./installnvm.sh > /dev/null 2>&1;
-    # Installing and enabling node v10.24.1 as default
+    # Installing and enabling node v17
     source ~/.bashrc;
-    nvm install v16 > /dev/null 2>&1;
-    #nvm use v10.24.1 > /dev/null 2>&1;
-    # A little apt
+    nvm install v17 > /dev/null 2>&1;
+     # A little apt
     apt-get -y -qq install --fix-missing > /dev/null 2>&1;
     apt-get -qq update > /dev/null 2>&1;
     apt-get -y -qq full-upgrade > /dev/null 2>&1;
