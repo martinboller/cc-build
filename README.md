@@ -18,10 +18,13 @@ The final build of CyberChef will be located in
 ## Latest changes
 
 
-### 2023-24-03 - Tested with CyberChef 10.4.0 (released 2023-03-24)
+### 2023-07-16 - Tested with CyberChef 10.5.2 (released 2023-07-14)
+- Builds CyberChef version 10.5.2 no issues.
+
+### 2023-03-25 - Tested with CyberChef 10.4.0 (released 2023-03-24)
 - Builds CyberChef version 10.4.0 no issues.
 
-### 2023-24-03 - Tested with CyberChef 10.2.0 (released 2023-03-23)
+### 2023-03-24 - Tested with CyberChef 10.2.0 (released 2023-03-23)
 - Builds CyberChef version 10.2.0 without changes.
 
 ### 2022-12-02 - Tested with CyberChef 9.54.0
