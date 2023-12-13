@@ -17,6 +17,8 @@ The final build of CyberChef will be located in
 
 ## Latest changes
 
+### 2023-12-13 - Tested with Debian 12
+- Builds CyberChef version 10.5.2 no issues.
 
 ### 2023-07-16 - Tested with CyberChef 10.5.2 (released 2023-07-14)
 - Builds CyberChef version 10.5.2 no issues.

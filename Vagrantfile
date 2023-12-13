@@ -2,7 +2,7 @@ Vagrant.configure("2") do |config|
 
 # charpentier CyberChef Build
   config.vm.define "charpentier" do |cfg|
-    cfg.vm.box = "generic/debian11"
+    cfg.vm.box = "generic/debian12"
     cfg.vm.hostname = "charpentier"
     cfg.vm.network "public_network", type: "dhcp", bridge: 'enp1s0'
     cfg.vm.provision :file, source: './installfiles', destination: "/tmp/installfiles"
@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
 
   # cyberchef CyberChef Build
   config.vm.define "cyberchef" do |cfg|
-    cfg.vm.box = "generic/debian11"
+    cfg.vm.box = "generic/debian12"
     cfg.vm.hostname = "cyberchef"
     cfg.vm.network "public_network", type: "dhcp", bridge: 'enp1s0'
     cfg.vm.provision :file, source: './installfiles', destination: "/tmp/installfiles"
