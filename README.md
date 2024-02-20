@@ -17,6 +17,10 @@ The final build of CyberChef will be located in
 
 ## Latest changes
 
+
+#### 2024-02-20 - 10.8.0
+- Builds CyberChef version 10.8.0 no issues.
+
 ### 2024-02-04 - GCHQ release 10.6.0
 - Builds CyberChef version 10.6.0 no issues.
 
