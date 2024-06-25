@@ -301,7 +301,7 @@ main() {
     echo -e "\e[1;31m - Powering off in 30 seconds!\e[0m";
     echo -e "\e[1;32m-------------------------------------------\e[0m";
     /usr/bin/logger 'Build Environment main() finished' -t 'CyberChef-20221123';
-    #systemctl poweroff > /dev/null 2>&1;
+    systemctl poweroff > /dev/null 2>&1;
 }
 
 main;
