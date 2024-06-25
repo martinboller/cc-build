@@ -40,14 +40,6 @@ install_prerequisites() {
     # Other pre-requisites for CyberChef
     apt-get -y -qq install python3-pip python-is-python3 curl gnupg2 > /dev/null 2>&1;
     apt-get -y -qq install bash-completion git iptables > /dev/null 2>&1;
-    # NodeJS 10 required for CyberChef, so going to install NVM to be able to install Node v10.24.1
-    curl -s https://raw.githubusercontent.com/creationix/nvm/master/install.sh > ./installnvm.sh
-    chmod 744 installnvm.sh > /dev/null 2>&1;
-    ./installnvm.sh > /dev/null 2>&1;
-    # Installing and enabling node v20
-    source ~/.bashrc;
-    nvm install v18 > /dev/null 2>&1;
-    nvm use v18;
      # A little apt
     apt-get -y -qq install --fix-missing > /dev/null 2>&1;
     apt-get -qq update > /dev/null 2>&1;
@@ -57,6 +49,14 @@ install_prerequisites() {
     apt-get -y -qq clean > /dev/null 2>&1;
     # Python pip packages
     python3 -m pip install --upgrade pip > /dev/null 2>&1;
+    # NodeJS 10 required for CyberChef, so going to install NVM to be able to install Node v10.24.1
+    curl -s https://raw.githubusercontent.com/creationix/nvm/master/install.sh > ./installnvm.sh
+    chmod 744 installnvm.sh > /dev/null 2>&1;
+    ./installnvm.sh > /dev/null 2>&1;
+    # Installing and enabling node v18
+    source ~/.bashrc;
+    nvm install v18 > /dev/null 2>&1;
+    nvm use v18;
     echo -e "\e[1;32m - Installing Prerequisite packages finished\e[0m";
     /usr/bin/logger 'install_prerequisites finished' -t 'CyberChef-20221123';
 }
@@ -90,20 +90,26 @@ install_cyberchef() {
 
     /usr/bin/logger 'npm Install CyberChef' -t 'CyberChef-20221123';
     echo -e "\e[1;36m ... npm install CyberChef\e[0m";
-    npm --experimental-modules --unsafe-perm install > /dev/null 2>&1;
+    npm --experimental-modules --unsafe-perm --fix install --force > /dev/null 2>&1;
 
     /usr/bin/logger 'npm rebuild CyberChef' -t 'CyberChef-20221123';
     echo -e "\e[1;36m ... npm rebuild CyberChef\e[0m";
-    npm --experimental-modules --unsafe-perm rebuild > /dev/null 2>&1;
+    npm --experimental-modules --unsafe-perm --fix rebuild --force > /dev/null 2>&1;
 
     /usr/bin/logger 'audit and fix NPM modules CyberChef' -t 'CyberChef-20221123';
     echo -e "\e[1;36m ... audit and fix npm modules CyberChef\e[0m";
-    npm --experimental-modules --unsafe-perm audit fix --force > /dev/null 2>&1;
+    npm audit fix --force > /dev/null 2>&1;
+    npm audit fix --force > /dev/null 2>&1;
+    npm audit fix --force > /dev/null 2>&1;
+
+    /usr/bin/logger 'npm rebuild CyberChef' -t 'CyberChef-20221123';
+    echo -e "\e[1;36m ... npm rebuild CyberChef\e[0m";
+    npm --experimental-modules --unsafe-perm --fix rebuild --force > /dev/null 2>&1;
 
     /usr/bin/logger 'creating production build of CyberChef' -t 'CyberChef-20221123';
     echo -e "\e[1;36m ... creating production build of CyberChef\e[0m";
     echo -e "\e[1;36m ... - This will take a few minutes - ...\e[0m";
-    grunt prod --force > /dev/null 2>&1;
+    grunt prod --fix --force > /dev/null 2>&1;
 
     /usr/bin/logger 'Set permissions' -t 'CyberChef-20221123';
     echo -e "\e[1;36m ... Setting permissions on build directory\e[0m";
@@ -295,7 +301,7 @@ main() {
     echo -e "\e[1;31m - Powering off in 30 seconds!\e[0m";
     echo -e "\e[1;32m-------------------------------------------\e[0m";
     /usr/bin/logger 'Build Environment main() finished' -t 'CyberChef-20221123';
-    systemctl poweroff > /dev/null 2>&1;
+    #systemctl poweroff > /dev/null 2>&1;
 }
 
 main;
