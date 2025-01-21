@@ -51,7 +51,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "cyberchef" do |cfg|
     cfg.vm.box = "generic/debian12"
     cfg.vm.hostname = "cyberchef"
-    cfg.vm.network "public_network", type: "dhcp", bridge: 'enp1s0'
+    cfg.vm.network "public_network", dev: 'br0', bridge: 'br0', mode: 'bridge', type: 'bridge'
     cfg.vm.provision :file, source: './installfiles', destination: "/tmp/installfiles"
     cfg.vm.provision :shell, path: "bootstrap.sh"
     cfg.vm.synced_folder "./CyberChef/", "/mnt/build"
