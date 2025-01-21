@@ -95,8 +95,8 @@ main() {
     /usr/bin/logger '!!!!! Main routine starting' -t 'CyberChef-bootstrap';
     bootstrap_install_public_ssh_key;
     bootstrap_prerequisites;
-    bootstrap_locale;
-    bootstrap_timezone;
+    #bootstrap_locale;
+    #bootstrap_timezone;
     # copy relevant scripts
     /bin/cp /tmp/installfiles/*.sh /root/ > /dev/null 2>&1;
     chmod +x /root/*.sh > /dev/null 2>&1;
