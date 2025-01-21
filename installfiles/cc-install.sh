@@ -421,11 +421,11 @@ main() {
     # CyberChef finalized build location
     BUILD_LOCATION="/var/www/CyberChef";
     # User for linux maintenance
-    cyberchef_linux_pw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 16 | tr -d '\n');
-    cyberchef_linux_user=cyberchef;
+    static cyberchef_linux_pw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 16 | tr -d '\n');
+    static cyberchef_linux_user=cyberchef;
     # User for basic authentication with NGINX
-    cyberchef_web_user=cyberchef;
-    cyberchef_web_pw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 12 | tr -d '\n');
+    static cyberchef_web_user=cyberchef;
+    static cyberchef_web_pw=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 12 | tr -d '\n');
 
     ###############################################################################################################
     # NGINX and certificates

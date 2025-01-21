@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
     cfg.vm.network "public_network", dev: 'br0', bridge: 'br0', mode: 'bridge', type: 'bridge'
     cfg.vm.provision :file, source: './installfiles', destination: "/tmp/installfiles"
     cfg.vm.provision :shell, path: "bootstrap.sh"
-    cfg.vm.synced_folder "./CyberChef/", "/mnt/build"
+    cfg.vm.synced_folder "./CyberChef/", "/mnt/build", type: '9p', accessmode: "mapped"
     
     cfg.vm.provider "libvirt" do |lv, override|
       lv.graphics_type = "vnc"
